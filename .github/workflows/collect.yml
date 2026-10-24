@@ -1,0 +1,21 @@
+name: Collect Panel
+
+on:
+  schedule:
+    - cron: "23 15 * * 1"  # Weekly Monday 15:23 UTC during trial
+  workflow_dispatch:
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Note coverage
+        run: |
+          echo "Collection harness. Requires authorized API keys as secrets (OPENAI_API_KEY etc.)."
+          echo "If fewer than 3 models accessible, record authentic available and disclose."
+          echo "Do not simulate or relabel. Preserve original response bytes."
+          echo "Budget: per-run and total limits enforced in config. At most one retry."
+          date -u
+      # Actual API calls would go here with secrets, recording hashes, metadata, UTC time.
+      # For launch: operator action required to add secrets and enable.
