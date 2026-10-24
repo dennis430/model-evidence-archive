@@ -2,20 +2,32 @@ name: Collect Panel
 
 on:
   schedule:
-    - cron: "23 15 * * 1"  # Weekly Monday 15:23 UTC during trial
+    - cron: "23 15 * * 1"
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   collect:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Note coverage
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run collector (dry)
         run: |
-          echo "Collection harness. Requires authorized API keys as secrets (OPENAI_API_KEY etc.)."
-          echo "If fewer than 3 models accessible, record authentic available and disclose."
-          echo "Do not simulate or relabel. Preserve original response bytes."
-          echo "Budget: per-run and total limits enforced in config. At most one retry."
-          date -u
-      # Actual API calls would go here with secrets, recording hashes, metadata, UTC time.
-      # For launch: operator action required to add secrets and enable.
+          python -c "
+          import sys
+          sys.path.insert(0, '.')
+          from src.collector.collector import run_collection
+          import json
+          print(json.dumps(run_collection(dry_run=True), indent=2))
+          "
+      - name: Upload status
+        uses: actions/upload-artifact@v4
+        with:
+          name: collection-status
+          path: |
+            probes/
